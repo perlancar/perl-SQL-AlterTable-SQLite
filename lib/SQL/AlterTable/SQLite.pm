@@ -169,6 +169,8 @@ sub gen_sql_alter_table {
         }
     }
 
+    my $new_table = $args{rename_table} // $table;
+
     if ($create_tmp) {
         # XXX check that temporary name doesn't exist
         my $tmp_table = "_${table}_tmp";
@@ -207,6 +209,11 @@ sub gen_sql_alter_table {
             "SELECT ", join(",", map {"\"$_\""} @cols_old)," ",
             "FROM \"$table\"",
         );
+        push @sql, "DROP TABLE \"$table\"";
+        push @sql, "ALTER TABLE \"$tmp_table\" RENAME TO \"$new_table\"";
+    } else {
+        push @sql, "ALTER TABLE \"$table\" RENAME TO \"$new_table\""
+            if $table ne $new_table;
     }
 
     # add columns
@@ -217,18 +224,12 @@ sub gen_sql_alter_table {
                 die "Can't add column '$c': column already exist";
             }
             if ($create_tmp) {
-                push @sql, "ALTER TABLE \"$table\" ADD COLUMN \"$c\" $def";
+                push @sql, "ALTER TABLE \"$new_table\" ADD COLUMN \"$c\" $def";
             } else {
                 $col_orders{$c} = keys(%col_orders);
                 $col_definitions{$c} = $def;
             }
         }
-    }
-
-    # rename table
-    if (defined $args{rename_table}) {
-        # XXX check that new table doesn't exist
-        push @sql, "ALTER TABLE \"$table\" RENAME TO \"$args{rename_table}\"";
     }
 
     \@sql;
@@ -241,14 +242,25 @@ sub gen_sql_alter_table {
 
  use SQL::AlterTable::SQLite qw(gen_sql_alter_table);
 
- my $sql_statements = gen_sql_alter_table(
+ my $sql_stmts = gen_sql_alter_table(
      dbh            => $dbh,
-     table          => 'foo',
-     delete_columns => ['d1', 'd2'],
-     add_columns    => ['a1', 'INT', 'a2', 'TEXT'],
-     modify_columns => ['m1', 'INT NOT NULL', 'm2', 'INT'],
-     rename_columns => ['r1', 'nr1', 'r2', 'nr2'],
+     table          => 't',
+     delete_columns => ['b'],
+     modify_columns => ['a', 'INT NOT NULL'],
+     rename_columns => ['a', 'a2'],
+     add_columns    => ['c', 'TEXT'],
+     rename_table   => 't2',
  );
+
+The result:
+
+ [
+     'CREATE TABLE "_t_tmp" ("a2" INT NOT NULL)',
+     'INSERT INTO "_t_tmp" ("a2") SELECT "a" FROM "t"',
+     'DROP TABLE "t"',
+     'ALTER TABLE "_t_tmp" RENAME TO "t2"',
+     'ALTER TABLE "t2" ADD COLUMN "c" TEXT',
+ ]
 
 
 =head1 DESCRIPTION

@@ -42,12 +42,15 @@ my $res = gen_sql_alter_table(
     modify_columns => ['a', 'INT NOT NULL'],
     rename_columns => ['a', 'a2'],
     add_columns    => ['c', 'TEXT'],
+    rename_table   => 't2',
 );
 
 is_deeply($res, [
     'CREATE TABLE "_t_tmp" ("a2" INT NOT NULL)',
     'INSERT INTO "_t_tmp" ("a2") SELECT "a" FROM "t"',
-    'ALTER TABLE "t" ADD COLUMN "c" TEXT',
+    'DROP TABLE "t"',
+    'ALTER TABLE "_t_tmp" RENAME TO "t2"',
+    'ALTER TABLE "t2" ADD COLUMN "c" TEXT',
 ]) or diag explain $res;
 
 DONE_TESTING:
