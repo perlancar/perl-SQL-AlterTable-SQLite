@@ -256,9 +256,13 @@ sub gen_sql_alter_table {
 
 =head1 SEE ALSO
 
+=over
+
 =item * L<SQL::AlterTable::SQLite>
 
 You can feed the result of C<gen_sql_alter_table()> to
 C<SQL::AlterTable::SQLite>'s C<create_or_update_db_schema>.
+
+=back
 
 =cut
