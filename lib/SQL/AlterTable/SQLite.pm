@@ -258,10 +258,10 @@ sub gen_sql_alter_table {
 
 =over
 
-=item * L<SQL::AlterTable::SQLite>
+=item * L<SQL::Schema::Versioned>
 
 You can feed the result of C<gen_sql_alter_table()> to
-C<SQL::AlterTable::SQLite>'s C<create_or_update_db_schema>.
+C<SQL::Schema::Versioned>'s C<create_or_update_db_schema>.
 
 =back
 
