@@ -1,5 +1,3 @@
-Revision history for SQL-AlterTable-SQLite
-
 0.003   2016-07-10 (PERLANCAR)
 
 	- Bump prereq version Test::WithDB::SQLite 0.08 to pull DBD::SQLite as a
